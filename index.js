@@ -3,7 +3,6 @@ import bodyParser from "body-parser";
 
 const app = express();
 const port = 3000;
-const masterKey = "4VGP2DN-6EWM4SJ-N6FGRHV-Z3PR3TT";
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -15,10 +14,9 @@ app.get("/random", (req, res) => {
 
 //2. GET a specific joke
 app.get("/jokes/:id", (req, res) => {
-  //check the id  if is an numerical
-  const jokeID = req.params.id - 1;
-  console.log(jokeID);
-  res.json(jokes[jokeID]);
+  //assume the id  if is an numerical
+  const jokeID = req.params.id;
+  res.json(jokes.find((jokes) => jokes.id == jokeID));
 });
 
 //3. GET a jokes by filtering on the joke type
@@ -26,38 +24,87 @@ app.get("/filter", (req, res) => {
   // value and the list of jokes
   const jokeType = req.query.type;
   console.log(jokeType);
-  const jokeList = jokes.filter((jokes) => jokes.jokeType == jokeType);
 
   //filter by type
-  // const jokeList = jokes.filter((jokes) => jokes.jokeType.match(jokeType));
-  console.log(jokeList)
+  const jokeList = jokes.filter((jokes) => jokes.jokeType == jokeType);
+  console.log(jokeList);
   //output json
   res.json(jokeList);
 });
 
 //4. POST a new joke
 app.post("/jokes", (req, res) => {
-  const jokeID = jokes.length + 1;
   const jokeText = req.body.text;
   const jokeType = req.body.type;
 
   const newLength = jokes.push({
-    id: jokeID,
+    id: jokes.length + 1, //last element(joke) id is 100
     jokeText: jokeText,
     jokeType: jokeType,
   });
 
   //response of api
-  res.json(jokes.at(jokeID));
+  res.json(jokes[newLength-1]);
 });
 
 //5. PUT a joke
+app.put("/jokes/:id", (req, res) => {
+  const jokeID = req.params.id;
+  console.log(jokeID);
 
-//6. PATCH a joke
+  //change text and type in jokeID provided
+  const changeJoke = jokes.find((jokes) => jokes.id == jokeID);
+  console.log(changeJoke);
+  changeJoke.jokeText = req.body.jokeText;
+  changeJoke.jokeType = req.body.jokeType;
+
+  //output
+  res.json(jokes[jokeID]);
+});
+
+//6. PATCH a joke / editing jokes
+app.patch('/jokes/:id', (req,res) =>{
+  const jokeID = parseInt(req.params.id);
+  console.log(jokeID);
+  //edit the joke. text and type
+  const editJoke = jokes.find((jokes) => jokes.id === jokeID);
+  if (editJoke != undefined) {
+
+    editJoke.jokeText = req.body.text || editJoke.jokeText; // this OR (||) that
+    editJoke.jokeType = req.body.type || editJoke.jokeType;
+  
+    //output API response
+    res.json(editJoke);
+  } else {
+    //output API response
+    
+     console.error("No Jokes match the provided ID: " + jokeID);
+     res.send("We didn't find that funny.");
+  }
+})
 
 //7. DELETE Specific joke
+app.delete('/jokes/:id',(req,res) => {
+  //Get ID
+  const jokeID = parseInt(req.params.id);
+
+  //delete Joke
+  const jokeDel = jokes.find((jokes) => jokes.id === jokeID);
+
+})
 
 //8. DELETE All jokes
+app.delete('/jokes/all', (req,res) => {
+  //delete all
+  
+ while ((jokes.length -1) >= 0) {
+   jokes.pop();  //remove a joke.
+   console.log(jokes.length);
+ }
+
+ //out put API response
+ res.send("OK");
+})
 
 app.listen(port, () => {
   console.log(`Successfully started server on port ${port}.`);
