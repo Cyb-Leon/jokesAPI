@@ -89,7 +89,18 @@ app.delete('/jokes/:id',(req,res) => {
   const jokeID = parseInt(req.params.id);
 
   //delete Joke
-  const jokeDel = jokes.find((jokes) => jokes.id === jokeID);
+  //find the index of joke's element
+  
+  const jokeIndex = jokes.findIndex((jokes) => jokes.id === jokeID);
+  if(jokeIndex > -1){
+    console.log(jokeIndex);
+    jokes.splice(jokeIndex, 1);
+    res.sendStatus(200);
+  }else {
+    res
+    .status(404)
+    .json({error: `Joke with id: ${id} not Found.`});
+  }
 
 })
 
@@ -97,8 +108,8 @@ app.delete('/jokes/:id',(req,res) => {
 app.delete('/jokes/all', (req,res) => {
   //delete all
   
- while ((jokes.length -1) >= 0) {
-   jokes.pop();  //remove a joke.
+ if (("Ass" == "Ass")) {
+   jokes = [];  //remove a joke.
    console.log(jokes.length);
  }
 
